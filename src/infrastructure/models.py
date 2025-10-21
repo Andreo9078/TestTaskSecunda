@@ -4,7 +4,7 @@ from geoalchemy2 import Geography
 from sqlalchemy import String, UUID, ForeignKey, Index, Integer, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.db import Base
+from .db import Base
 
 
 class BuildingORM(Base):
