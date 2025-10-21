@@ -10,6 +10,8 @@ python = "^3.12"
 fastapi = "^0.119.1"
 uvicorn = "^0.38.0"
 python-dotenv = "^1.1.1"
+geoalchemy2 = "^0.18.0"
+sqlalchemy = "^2.0.44"
 
 
 [build-system]
