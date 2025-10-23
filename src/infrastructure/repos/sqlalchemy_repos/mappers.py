@@ -89,9 +89,9 @@ class OrganizationORMMapper(
 
     def __init__(
         self,
-        phone_mapper: PhoneORMMapper,
-        activity_mapper: ActivityORMMapper,
-        building_mapper: Optional["BuildingORMMapper"] = None,
+        phone_mapper: BaseORMToDomainMapper[PhoneORM, Phone] | None,
+        activity_mapper: BaseORMToDomainMapper[ActivityORM, Activity] | None,
+        building_mapper: BaseORMToDomainMapper[BuildingORM, Building] | None,
     ):
         self.phone_mapper = phone_mapper
         self.activity_mapper = activity_mapper
@@ -176,7 +176,7 @@ class BuildingORMMapper(BaseORMToDomainMapper[BuildingORM, Building]):
 
     def __init__(
         self,
-        org_mapper: OrganizationORMMapper,
+        org_mapper: BaseORMToDomainMapper[OrganizationORM, Organization] | None,
     ):
         self.org_mapper = org_mapper
 
