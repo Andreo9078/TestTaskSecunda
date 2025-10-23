@@ -1,6 +1,7 @@
 import uuid
+from typing import Optional
 
-from geoalchemy2 import Geography
+from geoalchemy2 import Geography, WKBElement
 from sqlalchemy import String, UUID, ForeignKey, Index, Integer, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,7 +16,7 @@ class BuildingORM(Base):
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
 
-    location: Mapped[str] = mapped_column(
+    location: Mapped[WKBElement] = mapped_column(
         Geography(geometry_type="POINT", srid=4326),
         nullable=False
     )
@@ -53,6 +54,12 @@ class OrganizationORM(Base):
         cascade="all, delete-orphan",
     )
 
+    activities: Mapped[list["ActivityORM"]] = relationship(
+        "ActivityORM",
+        secondary="organization_activities",
+        back_populates="organizations"
+    )
+
 
 class PhoneORM(Base):
     __tablename__ = "phone"
@@ -82,7 +89,7 @@ class ActivityORM(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     depth: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    parent_id: Mapped[uuid.UUID] = mapped_column(
+    parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("activity.id", ondelete="CASCADE"),
         nullable=True
