@@ -7,6 +7,23 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
 
+organization_activities = Table(
+    "organization_activity",
+    Base.metadata,
+    Column(
+        "organization_id",
+        UUID(as_uuid=True),
+        ForeignKey("organization.id", ondelete="CASCADE"),
+        primary_key=True
+    ),
+    Column(
+        "activity_id",
+        UUID(as_uuid=True),
+        ForeignKey("activity.id", ondelete="CASCADE"),
+        primary_key=True
+    )
+)
+
 
 class BuildingORM(Base):
     __tablename__ = "building"
@@ -18,12 +35,13 @@ class BuildingORM(Base):
 
     location: Mapped[WKBElement] = mapped_column(
         Geography(geometry_type="POINT", srid=4326),
-        nullable=False
+        nullable=False,
     )
 
     organizations: Mapped[list["OrganizationORM"]] = relationship(
         back_populates="building",
-        passive_deletes=True
+        passive_deletes=True,
+        lazy="selectin",
     )
 
     __table_args__ = (
@@ -46,18 +64,21 @@ class OrganizationORM(Base):
     )
 
     building: Mapped["BuildingORM"] = relationship(
-        back_populates="organizations"
+        back_populates="organizations",
+        lazy="selectin",
     )
 
     phones: Mapped[list["PhoneORM"]] = relationship(
         back_populates="organization",
         cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
     activities: Mapped[list["ActivityORM"]] = relationship(
         "ActivityORM",
-        secondary="organization_activities",
-        back_populates="organizations"
+        secondary=organization_activities,
+        back_populates="organizations",
+        lazy="selectin",
     )
 
 
@@ -99,29 +120,20 @@ class ActivityORM(Base):
         "ActivityORM",
         remote_side=[id],
         foreign_keys=[parent_id],
-        back_populates="children"
+        back_populates="children",
+        lazy="selectin",
     )
 
     children: Mapped[list["ActivityORM"]] = relationship(
         "ActivityORM",
         back_populates="parent",
         cascade="all, delete-orphan",
+        lazy="selectin",
     )
 
-
-organization_activities = Table(
-    "organization_activity",
-    Base.metadata,
-    Column(
-        "organization_id",
-        UUID(as_uuid=True),
-        ForeignKey("organization.id", ondelete="CASCADE"),
-        primary_key=True
-    ),
-    Column(
-        "activity_id",
-        UUID(as_uuid=True),
-        ForeignKey("activity.id", ondelete="CASCADE"),
-        primary_key=True
+    organizations: Mapped[list["OrganizationORM"]] = relationship(
+        "OrganizationORM",
+        secondary=organization_activities,
+        back_populates="activities",
+        lazy="selectin",
     )
-)
