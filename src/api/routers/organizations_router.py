@@ -27,20 +27,6 @@ async def get_organizations(
 
 
 @router.get(
-    "/{id}",
-    summary="Get organization by ID",
-    description="Retrieve a single organization by its UUID.",
-    response_model=GetOrganization,
-)
-async def get_organization(
-    id: UUID,
-    org_service: OrganizationServiceDepends,
-) -> GetOrganization:
-    org = await org_service.get(id)
-    return GetOrganization.model_validate(org)
-
-
-@router.get(
     "/in_radius",
     summary="Get organizations within a radius",
     description="Returns organizations within a given radius (meters) from a geo point.",
@@ -107,3 +93,17 @@ async def search_by_activity(
         activity_root_id,
     )
     return [GetOrganization.model_validate(org) for org in orgs]
+
+
+@router.get(
+    "/{id}",
+    summary="Get organization by ID",
+    description="Retrieve a single organization by its UUID.",
+    response_model=GetOrganization,
+)
+async def get_organization(
+    id: UUID,
+    org_service: OrganizationServiceDepends,
+) -> GetOrganization:
+    org = await org_service.get(id)
+    return GetOrganization.model_validate(org)
