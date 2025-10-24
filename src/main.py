@@ -4,6 +4,8 @@ from starlette import status
 
 from src.api import api_router
 from src.config import API_KEY
+from src.exceptions import registry as main_exc_registry
+from src.infrastructure.repos.exceptions import registry as repos_exc_registry
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -20,3 +22,6 @@ async def get_api_key(api_key: str = Security(api_key_header)):
 app = FastAPI(dependencies=[Depends(get_api_key)])
 
 app.include_router(api_router)
+
+main_exc_registry(app.add_exception_handler)
+repos_exc_registry(app.add_exception_handler)
