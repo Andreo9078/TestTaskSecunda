@@ -17,6 +17,7 @@ asyncpg = "^0.30.0"
 pytest = "^8.4.2"
 shapely = "^2.1.2"
 pytest-asyncio = "^1.2.0"
+poetry-core = "^2.2.1"
 
 
 [build-system]
