@@ -5,8 +5,8 @@ from uuid import UUID
 
 from src.exceptions import MaxDepthExceeded
 
-
 # ---------- Value Objects ----------
+
 
 @dataclass(frozen=True)
 class GeoPoint:
@@ -20,6 +20,7 @@ class Phone:
 
 
 # ---------- Entities ----------
+
 
 @dataclass
 class Building:

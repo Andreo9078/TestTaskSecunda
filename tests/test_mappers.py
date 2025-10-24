@@ -4,8 +4,8 @@ from unittest.mock import Mock
 import pytest
 
 try:
-    from shapely.geometry import Point
     from geoalchemy2.shape import from_shape
+    from shapely.geometry import Point
 
     HAS_SHAPELY = True
 except ImportError:
@@ -13,16 +13,13 @@ except ImportError:
     Point = None
     from_shape = None
 
-from src.domain import Building, Organization, Activity, Phone, GeoPoint
+from src.domain import Activity, Building, GeoPoint, Organization, Phone
 from src.infrastructure.repos.sqlalchemy_repos.mappers import (
-    PhoneORMMapper,
-    ActivityORMMapper,
-    OrganizationORMMapper,
-    BuildingORMMapper
-)
-
+    ActivityORMMapper, BuildingORMMapper, OrganizationORMMapper,
+    PhoneORMMapper)
 
 # ========== Helper Functions ==========
+
 
 def create_mock_phone_orm(phone_id, number, org_id):
     """Create mock PhoneORM"""
@@ -45,8 +42,9 @@ def create_mock_activity_orm(activity_id, name, depth, parent=None, children=Non
     return mock
 
 
-def create_mock_organization_orm(org_id, name, building_id, building=None, phones=None,
-                                 activities=None):
+def create_mock_organization_orm(
+    org_id, name, building_id, building=None, phones=None, activities=None
+):
     """Create mock OrganizationORM"""
     mock = Mock()
     mock.id = org_id
@@ -70,6 +68,7 @@ def create_mock_building_orm(building_id, name, location, organizations=None):
 
 # ========== Fixtures ==========
 
+
 @pytest.fixture
 def phone_mapper():
     """Fixture for PhoneORMMapper"""
@@ -86,9 +85,7 @@ def activity_mapper():
 def organization_mapper(phone_mapper, activity_mapper):
     """Fixture for OrganizationORMMapper"""
     return OrganizationORMMapper(
-        phone_mapper=phone_mapper,
-        activity_mapper=activity_mapper,
-        building_mapper=None
+        phone_mapper=phone_mapper, activity_mapper=activity_mapper, building_mapper=None
     )
 
 
@@ -102,14 +99,13 @@ def building_mapper(organization_mapper):
 
 # ========== Phone Mapper Tests ==========
 
+
 class TestPhoneORMMapper:
 
     def test_phone_to_domain(self, phone_mapper):
         """Test Phone ORM to Domain conversion"""
         phone_orm = create_mock_phone_orm(
-            phone_id=uuid.uuid4(),
-            number="+1234567890",
-            org_id=uuid.uuid4()
+            phone_id=uuid.uuid4(), number="+1234567890", org_id=uuid.uuid4()
         )
 
         phone_domain = phone_mapper.to_domain(phone_orm)
@@ -125,8 +121,8 @@ class TestPhoneORMMapper:
 
         mock_phone_class = Mock(return_value=mock_phone_orm)
         monkeypatch.setattr(
-            'src.infrastructure.repos.sqlalchemy_repos.mappers.PhoneORM',
-            mock_phone_class
+            "src.infrastructure.repos.sqlalchemy_repos.mappers.PhoneORM",
+            mock_phone_class,
         )
 
         phone_orm = phone_mapper.from_domain(phone_domain)
@@ -137,14 +133,13 @@ class TestPhoneORMMapper:
 
 # ========== Activity Mapper Tests ==========
 
+
 class TestActivityORMMapper:
 
     def test_activity_to_domain_simple(self, activity_mapper):
         """Test simple Activity conversion without children"""
         activity_orm = create_mock_activity_orm(
-            activity_id=uuid.uuid4(),
-            name="Retail",
-            depth=0
+            activity_id=uuid.uuid4(), name="Retail", depth=0
         )
 
         activity_domain = activity_mapper.to_domain(activity_orm)
@@ -159,23 +154,15 @@ class TestActivityORMMapper:
         parent_id = uuid.uuid4()
 
         parent_orm = create_mock_activity_orm(
-            activity_id=parent_id,
-            name="Retail",
-            depth=0
+            activity_id=parent_id, name="Retail", depth=0
         )
 
         child1_orm = create_mock_activity_orm(
-            activity_id=uuid.uuid4(),
-            name="Food",
-            depth=1,
-            parent=parent_orm
+            activity_id=uuid.uuid4(), name="Food", depth=1, parent=parent_orm
         )
 
         child2_orm = create_mock_activity_orm(
-            activity_id=uuid.uuid4(),
-            name="Electronics",
-            depth=1,
-            parent=parent_orm
+            activity_id=uuid.uuid4(), name="Electronics", depth=1, parent=parent_orm
         )
 
         parent_orm.children = [child1_orm, child2_orm]
@@ -190,11 +177,7 @@ class TestActivityORMMapper:
 
     def test_activity_from_domain_simple(self, activity_mapper, monkeypatch):
         """Test Activity Domain to ORM conversion"""
-        activity_domain = Activity(
-            id=uuid.uuid4(),
-            name="Services",
-            depth=0
-        )
+        activity_domain = Activity(id=uuid.uuid4(), name="Services", depth=0)
 
         mock_activity_orm = Mock()
         mock_activity_orm.id = activity_domain.id
@@ -204,8 +187,8 @@ class TestActivityORMMapper:
 
         mock_activity_class = Mock(return_value=mock_activity_orm)
         monkeypatch.setattr(
-            'src.infrastructure.repos.sqlalchemy_repos.mappers.ActivityORM',
-            mock_activity_class
+            "src.infrastructure.repos.sqlalchemy_repos.mappers.ActivityORM",
+            mock_activity_class,
         )
 
         activity_orm = activity_mapper.from_domain(activity_domain)
@@ -218,16 +201,11 @@ class TestActivityORMMapper:
         parent_id = uuid.uuid4()
 
         parent_orm = create_mock_activity_orm(
-            activity_id=parent_id,
-            name="Parent",
-            depth=0
+            activity_id=parent_id, name="Parent", depth=0
         )
 
         child_orm = create_mock_activity_orm(
-            activity_id=uuid.uuid4(),
-            name="Child",
-            depth=1,
-            parent=parent_orm
+            activity_id=uuid.uuid4(), name="Child", depth=1, parent=parent_orm
         )
 
         parent_orm.children = [child_orm]
@@ -239,6 +217,7 @@ class TestActivityORMMapper:
 
 # ========== Building Mapper Tests ==========
 
+
 @pytest.mark.skipif(not HAS_SHAPELY, reason="Shapely not installed")
 class TestBuildingORMMapper:
 
@@ -248,9 +227,7 @@ class TestBuildingORMMapper:
         geo_point = from_shape(Point(30.5, 50.4), srid=4326)
 
         building_orm = create_mock_building_orm(
-            building_id=building_id,
-            name="Tower A",
-            location=geo_point
+            building_id=building_id, name="Tower A", location=geo_point
         )
 
         building_domain = building_mapper.to_domain(building_orm)
@@ -267,7 +244,7 @@ class TestBuildingORMMapper:
             id=uuid.uuid4(),
             name="Office Complex",
             location=GeoPoint(latitude=51.5, longitude=-0.1),
-            organizations=[]
+            organizations=[],
         )
 
         mock_building_orm = Mock()
@@ -277,8 +254,8 @@ class TestBuildingORMMapper:
 
         mock_building_class = Mock(return_value=mock_building_orm)
         monkeypatch.setattr(
-            'src.infrastructure.repos.sqlalchemy_repos.mappers.BuildingORM',
-            mock_building_class
+            "src.infrastructure.repos.sqlalchemy_repos.mappers.BuildingORM",
+            mock_building_class,
         )
 
         building_orm = building_mapper.from_domain(building_domain)
@@ -289,6 +266,7 @@ class TestBuildingORMMapper:
 
 # ========== Organization Mapper Tests ==========
 
+
 class TestOrganizationORMMapper:
 
     def test_organization_to_domain_simple(self, organization_mapper):
@@ -297,9 +275,7 @@ class TestOrganizationORMMapper:
         building_id = uuid.uuid4()
 
         org_orm = create_mock_organization_orm(
-            org_id=org_id,
-            name="Tech Corp",
-            building_id=building_id
+            org_id=org_id, name="Tech Corp", building_id=building_id
         )
 
         org_domain = organization_mapper.to_domain(org_orm)
@@ -314,22 +290,18 @@ class TestOrganizationORMMapper:
         org_id = uuid.uuid4()
 
         phone1_orm = create_mock_phone_orm(
-            phone_id=uuid.uuid4(),
-            number="+1111111111",
-            org_id=org_id
+            phone_id=uuid.uuid4(), number="+1111111111", org_id=org_id
         )
 
         phone2_orm = create_mock_phone_orm(
-            phone_id=uuid.uuid4(),
-            number="+2222222222",
-            org_id=org_id
+            phone_id=uuid.uuid4(), number="+2222222222", org_id=org_id
         )
 
         org_orm = create_mock_organization_orm(
             org_id=org_id,
             name="Restaurant",
             building_id=uuid.uuid4(),
-            phones=[phone1_orm, phone2_orm]
+            phones=[phone1_orm, phone2_orm],
         )
 
         org_domain = organization_mapper.to_domain(org_orm)
@@ -338,15 +310,14 @@ class TestOrganizationORMMapper:
         assert org_domain.phones[0].number == "+1111111111"
         assert org_domain.phones[1].number == "+2222222222"
 
-    def test_organization_from_domain_with_phones(self, organization_mapper, monkeypatch):
+    def test_organization_from_domain_with_phones(
+        self, organization_mapper, monkeypatch
+    ):
         """Test Organization Domain to ORM conversion with phones"""
         org_domain = Organization(
             id=uuid.uuid4(),
             name="Cafe",
-            phones=[
-                Phone(number="+3333333333"),
-                Phone(number="+4444444444")
-            ]
+            phones=[Phone(number="+3333333333"), Phone(number="+4444444444")],
         )
 
         # Mock phones
@@ -368,12 +339,12 @@ class TestOrganizationORMMapper:
         mock_org_class = Mock(return_value=mock_org)
 
         monkeypatch.setattr(
-            'src.infrastructure.repos.sqlalchemy_repos.mappers.OrganizationORM',
-            mock_org_class
+            "src.infrastructure.repos.sqlalchemy_repos.mappers.OrganizationORM",
+            mock_org_class,
         )
         monkeypatch.setattr(
-            'src.infrastructure.repos.sqlalchemy_repos.mappers.PhoneORM',
-            mock_phone_class
+            "src.infrastructure.repos.sqlalchemy_repos.mappers.PhoneORM",
+            mock_phone_class,
         )
 
         org_orm = organization_mapper.from_domain(org_domain)
@@ -383,6 +354,7 @@ class TestOrganizationORMMapper:
 
 
 # ========== Integration Tests ==========
+
 
 @pytest.mark.skipif(not HAS_SHAPELY, reason="Shapely not installed")
 class TestIntegrationMappers:
@@ -396,23 +368,21 @@ class TestIntegrationMappers:
         geo_point = from_shape(Point(20.0, 40.0), srid=4326)
 
         building_orm = create_mock_building_orm(
-            building_id=building_id,
-            name="Business Center",
-            location=geo_point
+            building_id=building_id, name="Business Center", location=geo_point
         )
 
         org1_orm = create_mock_organization_orm(
             org_id=org1_id,
             name="Company A",
             building_id=building_id,
-            building=building_orm
+            building=building_orm,
         )
 
         org2_orm = create_mock_organization_orm(
             org_id=org2_id,
             name="Company B",
             building_id=building_id,
-            building=building_orm
+            building=building_orm,
         )
 
         building_orm.organizations = [org1_orm, org2_orm]
@@ -434,16 +404,14 @@ class TestIntegrationMappers:
         geo_point = from_shape(Point(15.0, 35.0), srid=4326)
 
         building_orm = create_mock_building_orm(
-            building_id=building_id,
-            name="Cycle Test Building",
-            location=geo_point
+            building_id=building_id, name="Cycle Test Building", location=geo_point
         )
 
         org_orm = create_mock_organization_orm(
             org_id=org_id,
             name="Cycle Test Org",
             building_id=building_id,
-            building=building_orm
+            building=building_orm,
         )
 
         building_orm.organizations = [org_orm]
@@ -458,16 +426,14 @@ class TestIntegrationMappers:
         activity_id = uuid.uuid4()
 
         activity_orm = create_mock_activity_orm(
-            activity_id=activity_id,
-            name="Retail",
-            depth=0
+            activity_id=activity_id, name="Retail", depth=0
         )
 
         org_orm = create_mock_organization_orm(
             org_id=org_id,
             name="Shop",
             building_id=uuid.uuid4(),
-            activities=[activity_orm]
+            activities=[activity_orm],
         )
 
         org_domain = organization_mapper.to_domain(org_orm)
@@ -481,22 +447,19 @@ class TestIntegrationMappers:
             id=uuid.uuid4(),
             name="Test Building",
             location=GeoPoint(latitude=55.75, longitude=37.62),
-            organizations=[]
+            organizations=[],
         )
 
         mock_building_orm = Mock()
         mock_building_orm.id = original_building.id
         mock_building_orm.name = "Test Building"
-        mock_building_orm.location = from_shape(
-            Point(37.62, 55.75),
-            srid=4326
-        )
+        mock_building_orm.location = from_shape(Point(37.62, 55.75), srid=4326)
         mock_building_orm.organizations = []
 
         mock_building_class = Mock(return_value=mock_building_orm)
         monkeypatch.setattr(
-            'src.infrastructure.repos.sqlalchemy_repos.mappers.BuildingORM',
-            mock_building_class
+            "src.infrastructure.repos.sqlalchemy_repos.mappers.BuildingORM",
+            mock_building_class,
         )
 
         # Domain -> ORM
@@ -508,9 +471,11 @@ class TestIntegrationMappers:
         assert result_building.id == original_building.id
         assert result_building.name == original_building.name
         assert result_building.location.latitude == pytest.approx(
-            original_building.location.latitude)
+            original_building.location.latitude
+        )
         assert result_building.location.longitude == pytest.approx(
-            original_building.location.longitude)
+            original_building.location.longitude
+        )
 
     def test_complex_structure_with_all_relations(self, building_mapper):
         """Complex test with all relationships"""
@@ -521,21 +486,15 @@ class TestIntegrationMappers:
         geo_point = from_shape(Point(10.0, 20.0), srid=4326)
 
         activity_orm = create_mock_activity_orm(
-            activity_id=activity_id,
-            name="Restaurant",
-            depth=0
+            activity_id=activity_id, name="Restaurant", depth=0
         )
 
         phone_orm = create_mock_phone_orm(
-            phone_id=uuid.uuid4(),
-            number="+5555555555",
-            org_id=org_id
+            phone_id=uuid.uuid4(), number="+5555555555", org_id=org_id
         )
 
         building_orm = create_mock_building_orm(
-            building_id=building_id,
-            name="Food Court",
-            location=geo_point
+            building_id=building_id, name="Food Court", location=geo_point
         )
 
         org_orm = create_mock_organization_orm(
@@ -544,7 +503,7 @@ class TestIntegrationMappers:
             building_id=building_id,
             building=building_orm,
             phones=[phone_orm],
-            activities=[activity_orm]
+            activities=[activity_orm],
         )
 
         building_orm.organizations = [org_orm]

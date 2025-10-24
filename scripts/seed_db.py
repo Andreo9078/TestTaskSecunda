@@ -27,27 +27,53 @@ sys.path.insert(0, str(project_root))
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Point
 
-from src.infrastructure.models import (
-    BuildingORM,
-    OrganizationORM,
-    PhoneORM,
-    ActivityORM,
-    organization_activities
-)
 from src.infrastructure.db import async_session_maker
+from src.infrastructure.models import (ActivityORM, BuildingORM,
+                                       OrganizationORM, PhoneORM,
+                                       organization_activities)
 
 # Test data constants
 CITIES = [
-    {"name": "Москва", "lat": 55.7558, "lon": 37.6173,
-     "streets": ["Тверская", "Арбат", "Ленинский проспект", "Кутузовский проспект"]},
-    {"name": "Санкт-Петербург", "lat": 59.9343, "lon": 30.3351,
-     "streets": ["Невский проспект", "Лиговский проспект", "Московский проспект", "Садовая"]},
-    {"name": "Новосибирск", "lat": 55.0084, "lon": 82.9357,
-     "streets": ["Красный проспект", "Вокзальная магистраль", "Большевистская", "Ленина"]},
-    {"name": "Екатеринбург", "lat": 56.8389, "lon": 60.6057,
-     "streets": ["Ленина", "Малышева", "8 Марта", "Куйбышева"]},
-    {"name": "Казань", "lat": 55.8304, "lon": 49.0661,
-     "streets": ["Баумана", "Пушкина", "Кремлёвская", "Петербургская"]},
+    {
+        "name": "Москва",
+        "lat": 55.7558,
+        "lon": 37.6173,
+        "streets": ["Тверская", "Арбат", "Ленинский проспект", "Кутузовский проспект"],
+    },
+    {
+        "name": "Санкт-Петербург",
+        "lat": 59.9343,
+        "lon": 30.3351,
+        "streets": [
+            "Невский проспект",
+            "Лиговский проспект",
+            "Московский проспект",
+            "Садовая",
+        ],
+    },
+    {
+        "name": "Новосибирск",
+        "lat": 55.0084,
+        "lon": 82.9357,
+        "streets": [
+            "Красный проспект",
+            "Вокзальная магистраль",
+            "Большевистская",
+            "Ленина",
+        ],
+    },
+    {
+        "name": "Екатеринбург",
+        "lat": 56.8389,
+        "lon": 60.6057,
+        "streets": ["Ленина", "Малышева", "8 Марта", "Куйбышева"],
+    },
+    {
+        "name": "Казань",
+        "lat": 55.8304,
+        "lon": 49.0661,
+        "streets": ["Баумана", "Пушкина", "Кремлёвская", "Петербургская"],
+    },
 ]
 
 BUILDING_TYPES = [
@@ -87,30 +113,40 @@ COMPANY_NAMES = [
     "Альянс",
 ]
 
-PHONE_PREFIXES = ["+7495", "+7812", "+7383", "+7343",
-                  "+7843"]  # Moscow, SPb, Novosibirsk, Ekaterinburg, Kazan
+PHONE_PREFIXES = [
+    "+7495",
+    "+7812",
+    "+7383",
+    "+7343",
+    "+7843",
+]  # Moscow, SPb, Novosibirsk, Ekaterinburg, Kazan
 
 # Activity hierarchy
 ACTIVITY_TREE = {
     "Розничная торговля": {
         "depth": 1,
-        "children": ["Продукты питания", "Электроника", "Одежда", "Товары для дома"]
+        "children": ["Продукты питания", "Электроника", "Одежда", "Товары для дома"],
     },
     "Услуги": {
         "depth": 1,
-        "children": ["Финансовые услуги", "Юридические услуги", "Консалтинг", "IT-услуги"]
+        "children": [
+            "Финансовые услуги",
+            "Юридические услуги",
+            "Консалтинг",
+            "IT-услуги",
+        ],
     },
     "Здравоохранение": {
         "depth": 1,
-        "children": ["Больницы", "Поликлиники", "Аптеки", "Стоматология"]
+        "children": ["Больницы", "Поликлиники", "Аптеки", "Стоматология"],
     },
     "Образование": {
         "depth": 1,
-        "children": ["Школы", "Университеты", "Учебные центры", "Библиотеки"]
+        "children": ["Школы", "Университеты", "Учебные центры", "Библиотеки"],
     },
     "Развлечения": {
         "depth": 1,
-        "children": ["Кинотеатры", "Рестораны", "Кафе", "Бары"]
+        "children": ["Кинотеатры", "Рестораны", "Кафе", "Бары"],
     },
 }
 
@@ -121,7 +157,7 @@ def generate_phone_number(city_prefix: str = None) -> str:
         prefix = random.choice(PHONE_PREFIXES)
     else:
         prefix = city_prefix
-    number = ''.join([str(random.randint(0, 9)) for _ in range(7)])
+    number = "".join([str(random.randint(0, 9)) for _ in range(7)])
     return f"{prefix}{number}"
 
 
@@ -161,7 +197,7 @@ async def create_activities(session) -> dict[str, ActivityORM]:
             id=uuid.uuid4(),
             name=activity_name,
             depth=activity_data["depth"],
-            parent_id=None
+            parent_id=None,
         )
         session.add(activity)
         activities_map[activity_name] = activity
@@ -174,10 +210,7 @@ async def create_activities(session) -> dict[str, ActivityORM]:
 
         for child_name in activity_data["children"]:
             child = ActivityORM(
-                id=uuid.uuid4(),
-                name=child_name,
-                depth=2,
-                parent_id=parent.id
+                id=uuid.uuid4(), name=child_name, depth=2, parent_id=parent.id
             )
             session.add(child)
             activities_map[child_name] = child
@@ -198,11 +231,7 @@ async def create_building(
     point = generate_geo_point(city["lat"], city["lon"])
     location = from_shape(point, srid=4326)
 
-    building = BuildingORM(
-        id=uuid.uuid4(),
-        name=name,
-        location=location
-    )
+    building = BuildingORM(id=uuid.uuid4(), name=name, location=location)
 
     session.add(building)
     return building
@@ -213,7 +242,7 @@ async def create_organization(
     building: BuildingORM,
     org_number: int,
     activities: List[ActivityORM],
-    city_phone_prefix: str
+    city_phone_prefix: str,
 ) -> OrganizationORM:
     """Create a single organization with phones and activities"""
     company_type = random.choice(COMPANY_TYPES)
@@ -221,11 +250,7 @@ async def create_organization(
     name = f'{company_type} "{company_name}-{org_number}"'
 
     org_id = uuid.uuid4()
-    organization = OrganizationORM(
-        id=org_id,
-        name=name,
-        building_id=building.id
-    )
+    organization = OrganizationORM(id=org_id, name=name, building_id=building.id)
 
     session.add(organization)
 
@@ -244,13 +269,15 @@ async def create_organization(
         phone = PhoneORM(
             id=uuid.uuid4(),
             number=generate_phone_number(city_phone_prefix),
-            organization_id=organization.id
+            organization_id=organization.id,
         )
         session.add(phone)
 
     # Add 1-3 random activities
     num_activities = random.randint(1, 3)
-    selected_activities = random.sample(activities, min(num_activities, len(activities)))
+    selected_activities = random.sample(
+        activities, min(num_activities, len(activities))
+    )
     organization.activities.extend(selected_activities)
 
     return organization
@@ -276,8 +303,11 @@ async def seed_database(num_buildings_per_city: int = 5):
 
                 # Get phone prefix for this city
                 city_idx = CITIES.index(city)
-                city_phone_prefix = PHONE_PREFIXES[city_idx] if city_idx < len(PHONE_PREFIXES) else \
-                    PHONE_PREFIXES[0]
+                city_phone_prefix = (
+                    PHONE_PREFIXES[city_idx]
+                    if city_idx < len(PHONE_PREFIXES)
+                    else PHONE_PREFIXES[0]
+                )
 
                 for building_num in range(1, num_buildings_per_city + 1):
                     # Create building
@@ -291,8 +321,7 @@ async def seed_database(num_buildings_per_city: int = 5):
                         # Select random activities for this organization
                         num_org_activities = random.randint(1, 3)
                         org_activities = random.sample(
-                            all_activities,
-                            min(num_org_activities, len(all_activities))
+                            all_activities, min(num_org_activities, len(all_activities))
                         )
 
                         await create_organization(
@@ -300,7 +329,7 @@ async def seed_database(num_buildings_per_city: int = 5):
                             building,
                             org_num,
                             org_activities,
-                            city_phone_prefix
+                            city_phone_prefix,
                         )
                         total_organizations += 1
 
@@ -308,7 +337,9 @@ async def seed_database(num_buildings_per_city: int = 5):
                         total_phones += random.randint(1, 3)
 
                     if building_num % 2 == 0:
-                        print(f"  Created {building_num}/{num_buildings_per_city} buildings...")
+                        print(
+                            f"  Created {building_num}/{num_buildings_per_city} buildings..."
+                        )
 
             # Commit all changes
             await session.commit()
@@ -340,6 +371,7 @@ async def clear_database():
 
             # Delete phones (cascade will handle)
             from sqlalchemy import delete
+
             await session.execute(delete(PhoneORM))
 
             # Delete organizations
@@ -363,27 +395,25 @@ async def clear_database():
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Заполнение базы данных тестовыми данными")
+    parser = argparse.ArgumentParser(
+        description="Заполнение базы данных тестовыми данными"
+    )
     parser.add_argument(
         "--buildings-per-city",
         type=int,
         default=5,
-        help="Количество зданий на город (по умолчанию: 5)"
+        help="Количество зданий на город (по умолчанию: 5)",
     )
     parser.add_argument(
-        "--clear",
-        action="store_true",
-        help="Очистить базу данных перед заполнением"
+        "--clear", action="store_true", help="Очистить базу данных перед заполнением"
     )
 
     args = parser.parse_args()
-
 
     async def main():
         if args.clear:
             await clear_database()
 
         await seed_database(args.buildings_per_city)
-
 
     asyncio.run(main())

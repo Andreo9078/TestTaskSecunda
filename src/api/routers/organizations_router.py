@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, Query
 from fastapi_cache.decorator import cache
 
 from src.api.depends import OrganizationServiceDepends
-from src.api.schemes.get_organization import OrganizationFilters, GetOrganization, GeoPoint
+from src.api.schemes.get_organization import (GeoPoint, GetOrganization,
+                                              OrganizationFilters)
 
 router = APIRouter(prefix="/organizations")
 
@@ -20,9 +21,7 @@ async def get_organizations(
     org_service: OrganizationServiceDepends,
     filters: OrganizationFilters = Depends(),
 ) -> list[GetOrganization]:
-    orgs = await org_service.get_all(
-        **filters.model_dump(exclude_none=True)
-    )
+    orgs = await org_service.get_all(**filters.model_dump(exclude_none=True))
 
     return [GetOrganization.model_validate(org) for org in orgs]
 
@@ -53,7 +52,6 @@ async def get_organizations_in_radius(
     radius: float = Query(..., gt=0, description="Radius in meters"),
     filters: OrganizationFilters = Depends(),
     geo_point: GeoPoint = Depends(),
-
 ) -> list[GetOrganization]:
     orgs = await org_service.get_all_in_radius(
         latitude=geo_point.latitude,
@@ -74,15 +72,22 @@ async def get_organizations_in_radius(
 async def get_organizations_in_bbox(
     org_service: OrganizationServiceDepends,
     filters: OrganizationFilters = Depends(),
-    sw_lat: float = Query(..., alias="sw_lat", description="South-west latitude of bounding box"),
-    sw_lon: float = Query(..., alias="sw_lon", description="South-west longitude of bounding box"),
-    ne_lat: float = Query(..., alias="ne_lat", description="North-east latitude of bounding box"),
-    ne_lon: float = Query(..., alias="ne_lon", description="North-east longitude of bounding box"),
+    sw_lat: float = Query(
+        ..., alias="sw_lat", description="South-west latitude of bounding box"
+    ),
+    sw_lon: float = Query(
+        ..., alias="sw_lon", description="South-west longitude of bounding box"
+    ),
+    ne_lat: float = Query(
+        ..., alias="ne_lat", description="North-east latitude of bounding box"
+    ),
+    ne_lon: float = Query(
+        ..., alias="ne_lon", description="North-east longitude of bounding box"
+    ),
 ):
     orgs = await org_service.get_all_in_bbox(
-        sw_lat, sw_lon,
-        ne_lat, ne_lon,
-        **filters.model_dump(exclude_none=True))
+        sw_lat, sw_lon, ne_lat, ne_lon, **filters.model_dump(exclude_none=True)
+    )
 
     return [GetOrganization.model_validate(org) for org in orgs]
 

@@ -32,7 +32,9 @@ class ExceptionRegistry:
 
         return decorator
 
-    def handle_exceptions(self, handler: Callable[[Type[Exception], Callable], None]) -> None:
+    def handle_exceptions(
+        self, handler: Callable[[Type[Exception], Callable], None]
+    ) -> None:
         for exception, func in self._entities.items():
             handler(exception, func)
 
@@ -53,7 +55,7 @@ class ExceptionRegistry:
 
         return entity
 
-    def include_register(self, register: 'ExceptionRegistry') -> None:
+    def include_register(self, register: "ExceptionRegistry") -> None:
         for id_, entity in register.entities.items():
             self.register(id_, entity)
 

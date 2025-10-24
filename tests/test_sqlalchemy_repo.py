@@ -7,11 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import declarative_base
 
 from src.infrastructure.repos.base import BaseORMToDomainMapper
-from src.infrastructure.repos.exceptions import ObjectAlreadyExists, ObjectDoesNotExists
-from src.infrastructure.repos.sqlalchemy_repos.sqlalchemy_repo import SQLAlchemyRepository
+from src.infrastructure.repos.exceptions import (ObjectAlreadyExists,
+                                                 ObjectDoesNotExists)
+from src.infrastructure.repos.sqlalchemy_repos.sqlalchemy_repo import \
+    SQLAlchemyRepository
 
 # Configure pytest for asyncio
-pytest_plugins = ('pytest_asyncio',)
+pytest_plugins = ("pytest_asyncio",)
 
 Base = declarative_base()
 
@@ -33,7 +35,7 @@ class DomainUser:
 
 
 class ORMUser(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
@@ -46,23 +48,13 @@ class ORMUser(Base):
 
 
 class UserMapper(BaseORMToDomainMapper[ORMUser, DomainUser]):
-    def to_domain(
-        self, orm_obj: ORMUser, visited: Optional[dict] = None
-    ) -> DomainUser:
-        return DomainUser(
-            id=orm_obj.id,
-            name=orm_obj.name,
-            email=orm_obj.email
-        )
+    def to_domain(self, orm_obj: ORMUser, visited: Optional[dict] = None) -> DomainUser:
+        return DomainUser(id=orm_obj.id, name=orm_obj.name, email=orm_obj.email)
 
     def from_domain(
         self, domain_obj: DomainUser, visited: Optional[dict] = None
     ) -> ORMUser:
-        return ORMUser(
-            id=domain_obj.id,
-            name=domain_obj.name,
-            email=domain_obj.email
-        )
+        return ORMUser(id=domain_obj.id, name=domain_obj.name, email=domain_obj.email)
 
 
 @pytest.fixture
@@ -82,9 +74,7 @@ def user_mapper():
 def repository(mock_session, user_mapper):
     """Create SQLAlchemyRepository instance"""
     return SQLAlchemyRepository(
-        table=ORMUser,
-        session=mock_session,
-        domain_mapper=user_mapper
+        table=ORMUser, session=mock_session, domain_mapper=user_mapper
     )
 
 
@@ -300,9 +290,7 @@ class TestPrivateMethods:
     """Tests for private methods"""
 
     @pytest.mark.asyncio
-    async def test_save_calls_merge(
-        self, repository, mock_session, sample_domain_user
-    ):
+    async def test_save_calls_merge(self, repository, mock_session, sample_domain_user):
         await repository._save(sample_domain_user)
 
         mock_session.merge.assert_called_once()

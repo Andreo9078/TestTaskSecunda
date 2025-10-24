@@ -1,21 +1,18 @@
 from typing import Optional
 
-from geoalchemy2.shape import to_shape, from_shape
+from geoalchemy2.shape import from_shape, to_shape
 from shapely import Point
 
-from src.domain import Building, Organization, Activity, Phone, GeoPoint
-from src.infrastructure.models import (
-    BuildingORM, OrganizationORM, ActivityORM, PhoneORM
-)
+from src.domain import Activity, Building, GeoPoint, Organization, Phone
+from src.infrastructure.models import (ActivityORM, BuildingORM,
+                                       OrganizationORM, PhoneORM)
 from src.infrastructure.repos.base import BaseORMToDomainMapper
 
 
 class PhoneORMMapper(BaseORMToDomainMapper[PhoneORM, Phone]):
     """Mapper for Phone (simple value object, no cycles)"""
 
-    def to_domain(
-        self, data_obj: PhoneORM, visited: Optional[dict] = None
-    ) -> Phone:
+    def to_domain(self, data_obj: PhoneORM, visited: Optional[dict] = None) -> Phone:
         return Phone(number=data_obj.number)
 
     def from_domain(
@@ -41,7 +38,7 @@ class ActivityORMMapper(BaseORMToDomainMapper[ActivityORM, Activity]):
             name=data_obj.name,
             depth=data_obj.depth,
             parent=None,
-            children=[]
+            children=[],
         )
         visited[activity.id] = activity
 
@@ -82,9 +79,7 @@ class ActivityORMMapper(BaseORMToDomainMapper[ActivityORM, Activity]):
         return orm_obj
 
 
-class OrganizationORMMapper(
-    BaseORMToDomainMapper[OrganizationORM, Organization]
-):
+class OrganizationORMMapper(BaseORMToDomainMapper[OrganizationORM, Organization]):
     """Mapper for Organization"""
 
     def __init__(
@@ -107,11 +102,7 @@ class OrganizationORMMapper(
             return visited[data_obj.id]
 
         org = Organization(
-            id=data_obj.id,
-            name=data_obj.name,
-            phones=[],
-            building=None,
-            activities=[]
+            id=data_obj.id, name=data_obj.name, phones=[], building=None, activities=[]
         )
 
         visited[org.id] = org
@@ -121,14 +112,10 @@ class OrganizationORMMapper(
             org.phones.append(phone_domain)
 
         if self.building_mapper and data_obj.building:
-            org.building = self.building_mapper.to_domain(
-                data_obj.building, visited
-            )
+            org.building = self.building_mapper.to_domain(data_obj.building, visited)
 
         for activity_orm in data_obj.activities:
-            activity_domain = self.activity_mapper.to_domain(
-                activity_orm, visited
-            )
+            activity_domain = self.activity_mapper.to_domain(activity_orm, visited)
             org.activities.append(activity_domain)
 
         return org
@@ -163,9 +150,7 @@ class OrganizationORMMapper(
             )
 
         for activity_domain in domain_obj.activities:
-            activity_orm = self.activity_mapper.from_domain(
-                activity_domain, visited
-            )
+            activity_orm = self.activity_mapper.from_domain(activity_domain, visited)
             orm_obj.activities.append(activity_orm)
 
         return orm_obj
@@ -193,10 +178,7 @@ class BuildingORMMapper(BaseORMToDomainMapper[BuildingORM, Building]):
         geo_point = GeoPoint(latitude=point.y, longitude=point.x)
 
         building = Building(
-            id=data_obj.id,
-            name=data_obj.name,
-            location=geo_point,
-            organizations=[]
+            id=data_obj.id, name=data_obj.name, location=geo_point, organizations=[]
         )
 
         visited[building.id] = building
@@ -218,7 +200,7 @@ class BuildingORMMapper(BaseORMToDomainMapper[BuildingORM, Building]):
 
         geo_point = from_shape(
             Point(domain_obj.location.longitude, domain_obj.location.latitude),
-            srid=4326
+            srid=4326,
         )
 
         orm_obj = BuildingORM(

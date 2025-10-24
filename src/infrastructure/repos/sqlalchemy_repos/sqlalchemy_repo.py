@@ -1,10 +1,11 @@
-from typing import Any, Optional, AsyncIterable, Type
+from typing import Any, AsyncIterable, Optional, Type
 
-from sqlalchemy import select, Select
+from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.infrastructure.repos.base import BaseRepository, BaseORMToDomainMapper
-from src.infrastructure.repos.exceptions import ObjectAlreadyExists, ObjectDoesNotExists
+from src.infrastructure.repos.base import BaseORMToDomainMapper, BaseRepository
+from src.infrastructure.repos.exceptions import (ObjectAlreadyExists,
+                                                 ObjectDoesNotExists)
 
 
 class SQLAlchemyRepository[ORMObj, DomainObj, ID](BaseRepository[ORMObj, ID]):
@@ -12,7 +13,7 @@ class SQLAlchemyRepository[ORMObj, DomainObj, ID](BaseRepository[ORMObj, ID]):
         self,
         table: Type[ORMObj],
         session: AsyncSession,
-        domain_mapper: BaseORMToDomainMapper[ORMObj, DomainObj]
+        domain_mapper: BaseORMToDomainMapper[ORMObj, DomainObj],
     ) -> None:
         self.table = table
         self.session = session
@@ -24,9 +25,7 @@ class SQLAlchemyRepository[ORMObj, DomainObj, ID](BaseRepository[ORMObj, ID]):
         if res is None:
             return None
 
-        return self.domain_mapper.to_domain(
-            res
-        )
+        return self.domain_mapper.to_domain(res)
 
     async def get_all(self, **filters: Any) -> AsyncIterable[DomainObj]:
         stmt = self._create_get_all_stmt(**filters)
@@ -37,17 +36,13 @@ class SQLAlchemyRepository[ORMObj, DomainObj, ID](BaseRepository[ORMObj, ID]):
 
     async def create(self, obj: DomainObj) -> None:
         if await self._get(obj.id):
-            raise ObjectAlreadyExists(
-                f"Object with id {obj.id} already exists."
-            )
+            raise ObjectAlreadyExists(f"Object with id {obj.id} already exists.")
 
         await self._save(obj)
 
     async def update(self, obj: DomainObj) -> None:
         if not await self._get(obj.id):
-            raise ObjectDoesNotExists(
-                f"Object with id {obj.id} does not exists."
-            )
+            raise ObjectDoesNotExists(f"Object with id {obj.id} does not exists.")
 
         await self._save(obj)
 
@@ -56,9 +51,7 @@ class SQLAlchemyRepository[ORMObj, DomainObj, ID](BaseRepository[ORMObj, ID]):
         if orm_obj:
             await self.session.delete(orm_obj)
         else:
-            raise ObjectDoesNotExists(
-                f"Object with id {obj_id} does not exists."
-            )
+            raise ObjectDoesNotExists(f"Object with id {obj_id} does not exists.")
 
     async def _save(self, obj: DomainObj):
         record = self.domain_mapper.from_domain(obj)

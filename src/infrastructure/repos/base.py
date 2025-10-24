@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional, AsyncIterable
+from typing import Any, AsyncIterable, Optional
 from uuid import UUID
 
 from src.domain import GeoPoint, Organization
@@ -101,7 +101,7 @@ class BaseOrganizationRepository(BaseRepository[Organization, UUID], ABC):
         offset: Optional[int] = None,
         limit: Optional[int] = None,
         activity_id: Optional[UUID] = None,
-        **filters: Any
+        **filters: Any,
     ) -> AsyncIterable["OrganizationORM"]:
         """
         Retrieve organizations within a given radius of a point.
@@ -126,7 +126,7 @@ class BaseOrganizationRepository(BaseRepository[Organization, UUID], ABC):
         offset: Optional[int] = None,
         limit: Optional[int] = None,
         activity_id: Optional[UUID] = None,
-        **filters: Any
+        **filters: Any,
     ) -> AsyncIterable["OrganizationORM"]:
         """
         Retrieve organizations inside a bounding box defined by two coordinates.

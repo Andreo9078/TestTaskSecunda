@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from geoalchemy2 import Geography, WKBElement
-from sqlalchemy import String, UUID, ForeignKey, Index, Integer, Table, Column
+from sqlalchemy import UUID, Column, ForeignKey, Index, Integer, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -14,15 +14,16 @@ organization_activities = Table(
         "organization_id",
         UUID(as_uuid=True),
         ForeignKey("organization.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True,
     ),
     Column(
         "activity_id",
         UUID(as_uuid=True),
         ForeignKey("activity.id", ondelete="CASCADE"),
-        primary_key=True
-    )
+        primary_key=True,
+    ),
 )
+
 
 class BuildingORM(Base):
     __tablename__ = "building"
@@ -59,7 +60,7 @@ class OrganizationORM(Base):
     building_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("building.id", ondelete="CASCADE"),
-        nullable=False
+        nullable=False,
     )
 
     building: Mapped["BuildingORM"] = relationship(
@@ -92,12 +93,11 @@ class PhoneORM(Base):
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("organization.id", ondelete="CASCADE"),
-        nullable=False
+        nullable=False,
     )
 
     organization: Mapped["OrganizationORM"] = relationship(
-        back_populates="phones",
-        lazy="selectin"
+        back_populates="phones", lazy="selectin"
     )
 
 
@@ -111,9 +111,7 @@ class ActivityORM(Base):
     depth: Mapped[int] = mapped_column(Integer, nullable=False)
 
     parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("activity.id", ondelete="CASCADE"),
-        nullable=True
+        UUID(as_uuid=True), ForeignKey("activity.id", ondelete="CASCADE"), nullable=True
     )
 
     parent: Mapped["ActivityORM"] = relationship(
