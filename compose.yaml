@@ -7,8 +7,8 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "${DB_PORT}:5432"
+    expose:
+      - ${DB_PORT}
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -32,6 +32,16 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: unless-stopped
+    expose:
+      - ${REDIS_PORT}
+    volumes:
+      - redis_data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
+
   web:
     build: .
     container_name: fastapi_app
@@ -39,19 +49,31 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     ports:
       - "8000:8000"
     environment:
+      DEBUG: False
+
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       DB_NAME: ${DB_NAME}
       DB_PORT: ${DB_PORT}
       DB_HOST: db
-      API_KEY: supersecretkey
+
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+
+      API_KEY: ${API_KEY}
+
+
+
 
 volumes:
   pg_data:
   pgadmin_data:
+  redis_data:
 
 
 
