@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
+from fastapi_cache.decorator import cache
 
 from src.api.depends import OrganizationServiceDepends
 from src.api.schemes.get_organization import OrganizationFilters, GetOrganization, GeoPoint
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/organizations")
     description="Returns a list of organizations with optional filtering.",
     response_model=list[GetOrganization],
 )
+@cache(expire=30)
 async def get_organizations(
     org_service: OrganizationServiceDepends,
     filters: OrganizationFilters = Depends(),
@@ -45,6 +47,7 @@ async def get_organization(
     description="Returns organizations within a given radius (meters) from a geo point.",
     response_model=list[GetOrganization],
 )
+@cache(expire=30)
 async def get_organizations_in_radius(
     org_service: OrganizationServiceDepends,
     radius: float = Query(..., gt=0, description="Radius in meters"),
@@ -67,6 +70,7 @@ async def get_organizations_in_radius(
     description="Returns organizations located inside the specified bounding box.",
     response_model=list[GetOrganization],
 )
+@cache(expire=30)
 async def get_organizations_in_bbox(
     org_service: OrganizationServiceDepends,
     filters: OrganizationFilters = Depends(),
@@ -89,6 +93,7 @@ async def get_organizations_in_bbox(
     description="Returns organizations linked to a given activity root ID.",
     response_model=list[GetOrganization],
 )
+@cache(expire=30)
 async def search_by_activity(
     org_service: OrganizationServiceDepends,
     activity_root_id: UUID,

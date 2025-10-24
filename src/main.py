@@ -1,9 +1,16 @@
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+
 from fastapi import FastAPI, Security, HTTPException, Depends
 from fastapi.security import APIKeyHeader
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+from redis import asyncio as aioredis
 from starlette import status
 
 from src.api import api_router
-from src.config import API_KEY
+from src.config import API_KEY, REDIS_HOST, REDIS_PORT
 from src.exceptions import registry as main_exc_registry
 from src.infrastructure.repos.exceptions import registry as repos_exc_registry
 
@@ -19,7 +26,26 @@ async def get_api_key(api_key: str = Security(api_key_header)):
     return api_key
 
 
-app = FastAPI(dependencies=[Depends(get_api_key)])
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    redis = aioredis.from_url(
+        f"redis://{REDIS_HOST}:{REDIS_PORT}",
+        encoding="utf-8",
+        decode_responses=True
+    )
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    yield
+
+
+@cache()
+async def get_cache():
+    return 1
+
+
+app = FastAPI(
+    dependencies=[Depends(get_api_key)],
+    lifespan=lifespan,
+)
 
 app.include_router(api_router)
 
