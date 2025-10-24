@@ -24,7 +24,6 @@ organization_activities = Table(
     )
 )
 
-
 class BuildingORM(Base):
     __tablename__ = "building"
 
@@ -41,7 +40,7 @@ class BuildingORM(Base):
     organizations: Mapped[list["OrganizationORM"]] = relationship(
         back_populates="building",
         passive_deletes=True,
-        lazy="selectin",
+        lazy="noload",
     )
 
     __table_args__ = (
@@ -97,7 +96,8 @@ class PhoneORM(Base):
     )
 
     organization: Mapped["OrganizationORM"] = relationship(
-        back_populates="phones"
+        back_populates="phones",
+        lazy="selectin"
     )
 
 
@@ -121,19 +121,19 @@ class ActivityORM(Base):
         remote_side=[id],
         foreign_keys=[parent_id],
         back_populates="children",
-        lazy="selectin",
+        lazy="noload",
     )
 
     children: Mapped[list["ActivityORM"]] = relationship(
         "ActivityORM",
         back_populates="parent",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        lazy="noload",
     )
 
     organizations: Mapped[list["OrganizationORM"]] = relationship(
         "OrganizationORM",
         secondary=organization_activities,
         back_populates="activities",
-        lazy="selectin",
+        lazy="noload",
     )
