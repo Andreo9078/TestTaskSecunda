@@ -56,6 +56,7 @@ GET /organizations
 - `name` — поиск по названию
 - `activity_id` — фильтр по виду деятельности
 
+
 2. Получить организацию по ID
 
 ```http request
@@ -67,7 +68,6 @@ GET /organizations/{id}
 ```http request
 GET /organizations/in_radius
 ```
-
 Параметры Query:
 
 - `latitude` — широта центра
