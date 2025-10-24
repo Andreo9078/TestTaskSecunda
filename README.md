@@ -96,3 +96,7 @@ GET /organizations/search_by_activity/{activity_root_id}
 
 Возвращает организации по указанному виду деятельности и всех его дочерних.
 
+### ER - диаграмма БД
+
+![ТЗSecunda](https://github.com/user-attachments/assets/2981e1be-b6c7-48ef-9262-2b201824397b)
+
