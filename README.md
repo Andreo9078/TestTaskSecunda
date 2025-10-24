@@ -12,6 +12,7 @@
 
 - `FastAPI`
 - `PostgreSQL` + `PostGIS`
+- `Redis` - кэш
 - `Alembic` для миграций
 - `Poetry` для управления зависимостями
 
@@ -27,6 +28,8 @@ DB_NAME=app_db
 DB_PORT=5432
 
 API_KEY=supersecretkey
+
+REDIS_PORT=6379
 ```
 
 2. Запуск через Docker Compose
