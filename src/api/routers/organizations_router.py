@@ -8,7 +8,12 @@ from src.api.schemes.get_organization import OrganizationFilters, GetOrganizatio
 router = APIRouter(prefix="/organizations")
 
 
-@router.get("")
+@router.get(
+    "",
+    summary="Get list of organizations",
+    description="Returns a list of organizations with optional filtering.",
+    response_model=list[GetOrganization],
+)
 async def get_organizations(
     org_service: OrganizationServiceDepends,
     filters: OrganizationFilters = Depends(),
@@ -20,20 +25,29 @@ async def get_organizations(
     return [GetOrganization.model_validate(org) for org in orgs]
 
 
-@router.get("/{id}")
+@router.get(
+    "/{id}",
+    summary="Get organization by ID",
+    description="Retrieve a single organization by its UUID.",
+    response_model=GetOrganization,
+)
 async def get_organization(
     id: UUID,
     org_service: OrganizationServiceDepends,
 ) -> GetOrganization:
     org = await org_service.get(id)
-
     return GetOrganization.model_validate(org)
 
 
-@router.get("/in_radius")
+@router.get(
+    "/in_radius",
+    summary="Get organizations within a radius",
+    description="Returns organizations within a given radius (meters) from a geo point.",
+    response_model=list[GetOrganization],
+)
 async def get_organizations_in_radius(
     org_service: OrganizationServiceDepends,
-    radius: float,
+    radius: float = Query(..., gt=0, description="Radius in meters"),
     filters: OrganizationFilters = Depends(),
     geo_point: GeoPoint = Depends(),
 
@@ -44,19 +58,23 @@ async def get_organizations_in_radius(
         radius=radius,
         **filters.model_dump(exclude_none=True),
     )
-
     return [GetOrganization.model_validate(org) for org in orgs]
 
 
-@router.get("/in_bbox")
+@router.get(
+    "/in_bbox",
+    summary="Get organizations within a bounding box",
+    description="Returns organizations located inside the specified bounding box.",
+    response_model=list[GetOrganization],
+)
 async def get_organizations_in_bbox(
     org_service: OrganizationServiceDepends,
     filters: OrganizationFilters = Depends(),
-    sw_lat: float = Query(..., alias="sw_lat"),
-    sw_lon: float = Query(..., alias="sw_lon"),
-    ne_lat: float = Query(..., alias="ne_lat"),
-    ne_lon: float = Query(..., alias="ne_lon"),
-) -> list[GetOrganization]:
+    sw_lat: float = Query(..., alias="sw_lat", description="South-west latitude of bounding box"),
+    sw_lon: float = Query(..., alias="sw_lon", description="South-west longitude of bounding box"),
+    ne_lat: float = Query(..., alias="ne_lat", description="North-east latitude of bounding box"),
+    ne_lon: float = Query(..., alias="ne_lon", description="North-east longitude of bounding box"),
+):
     orgs = await org_service.get_all_in_bbox(
         sw_lat, sw_lon,
         ne_lat, ne_lon,
@@ -65,7 +83,12 @@ async def get_organizations_in_bbox(
     return [GetOrganization.model_validate(org) for org in orgs]
 
 
-@router.get("/search_by_activity/{activity_root_id}")
+@router.get(
+    "/search_by_activity/{activity_root_id}",
+    summary="Search organizations by activity root",
+    description="Returns organizations linked to a given activity root ID.",
+    response_model=list[GetOrganization],
+)
 async def search_by_activity(
     org_service: OrganizationServiceDepends,
     activity_root_id: UUID,
