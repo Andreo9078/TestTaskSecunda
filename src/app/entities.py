@@ -62,7 +62,7 @@ class Activity:
         child.parent = self
         child.depth = self.depth + 1
 
-        if self.depth >= 3:
+        if child.depth > 3:
             raise MaxDepthExceeded("Depth can't be gather then 3")
 
         self.children.append(child)

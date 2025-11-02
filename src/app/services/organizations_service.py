@@ -1,7 +1,7 @@
 from typing import AsyncIterable
 from uuid import UUID
 
-from src.domain import GeoPoint, Organization
+from src.app.entities import GeoPoint, Organization
 from src.infrastructure.repos.base import BaseOrganizationRepository
 
 

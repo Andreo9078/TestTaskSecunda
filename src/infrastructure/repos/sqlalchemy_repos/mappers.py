@@ -3,7 +3,7 @@ from typing import Optional
 from geoalchemy2.shape import from_shape, to_shape
 from shapely import Point
 
-from src.domain import Activity, Building, GeoPoint, Organization, Phone
+from src.app.entities import Activity, Building, GeoPoint, Organization, Phone
 from src.infrastructure.models import (ActivityORM, BuildingORM,
                                        OrganizationORM, PhoneORM)
 from src.infrastructure.repos.base import BaseORMToDomainMapper

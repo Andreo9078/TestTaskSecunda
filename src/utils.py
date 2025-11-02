@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 if TYPE_CHECKING:
-    from src.domain import GeoPoint
+    from src.app.entities import GeoPoint
 
 
 def geopoint_to_wkb(point: "GeoPoint") -> WKBElement:

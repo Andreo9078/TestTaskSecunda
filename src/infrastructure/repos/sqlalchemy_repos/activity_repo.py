@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.domain import Activity
+from src.app.entities import Activity
 from src.infrastructure.models import ActivityORM
 from src.infrastructure.repos.base import BaseORMToDomainMapper
 

@@ -7,7 +7,7 @@ from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased, selectinload
 
-from src.domain import GeoPoint, Organization
+from src.app.entities import GeoPoint, Organization
 from src.infrastructure.models import (ActivityORM, BuildingORM,
                                        OrganizationORM,
                                        organization_activities)

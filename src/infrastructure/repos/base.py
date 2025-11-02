@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, AsyncIterable, Optional
 from uuid import UUID
 
-from src.domain import GeoPoint, Organization
+from src.app.entities import GeoPoint, Organization
 from src.infrastructure.models import OrganizationORM
 
 

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ....domain import Building
+from src.app.entities import Building
 from ...models import BuildingORM
 from ..base import BaseORMToDomainMapper
 from .sqlalchemy_repo import SQLAlchemyRepository

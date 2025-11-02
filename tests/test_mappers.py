@@ -13,7 +13,7 @@ except ImportError:
     Point = None
     from_shape = None
 
-from src.domain import Activity, Building, GeoPoint, Organization, Phone
+from src.app.entities import Activity, Building, GeoPoint, Organization, Phone
 from src.infrastructure.repos.sqlalchemy_repos.mappers import (
     ActivityORMMapper, BuildingORMMapper, OrganizationORMMapper,
     PhoneORMMapper)
