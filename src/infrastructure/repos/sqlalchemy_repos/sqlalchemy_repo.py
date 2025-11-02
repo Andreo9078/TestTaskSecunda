@@ -29,10 +29,13 @@ class SQLAlchemyRepository[ORMObj, DomainObj, ID](BaseRepository[ORMObj, ID]):
 
     async def get_all(self, **filters: Any) -> AsyncIterable[DomainObj]:
         stmt = self._create_get_all_stmt(**filters)
-        res = await self.session.stream(stmt)
 
-        async for row in res.scalars():
-            yield self.domain_mapper.to_domain(row)
+        async def _gen():
+            res = await self.session.stream(stmt)
+            async for row in res.scalars():
+                yield self.domain_mapper.to_domain(row)
+
+        return _gen()
 
     async def create(self, obj: DomainObj) -> None:
         if await self._get(obj.id):

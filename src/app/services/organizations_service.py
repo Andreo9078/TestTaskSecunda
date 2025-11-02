@@ -15,7 +15,7 @@ class OrganizationService:
     async def get_all(self, **filters) -> list[Organization]:
         res = []
 
-        orgs = self._org_repo.get_all(**filters)
+        orgs = await self._org_repo.get_all(**filters)
 
         async for org in orgs:
             print(org.building.location)
@@ -30,7 +30,7 @@ class OrganizationService:
             latitude=latitude,
             longitude=longitude,
         )
-        orgs = self._org_repo.get_all_in_radius(center, radius, **filters)
+        orgs = await self._org_repo.get_all_in_radius(center, radius, **filters)
 
         return await self._async_iter_to_list(orgs)
 
@@ -50,12 +50,12 @@ class OrganizationService:
             latitude=ne_latitude,
             longitude=ne_longitude,
         )
-        orgs = self._org_repo.get_all_in_bbox(sw, ne, **filters)
+        orgs = await self._org_repo.get_all_in_bbox(sw, ne, **filters)
 
         return await self._async_iter_to_list(orgs)
 
     async def get_all_in_actively_tree(self, actively_root_id: UUID, **filters):
-        orgs = self._org_repo.get_all_by_activity_tree(actively_root_id, **filters)
+        orgs = await self._org_repo.get_all_by_activity_tree(actively_root_id, **filters)
 
         return await self._async_iter_to_list(orgs)
 
