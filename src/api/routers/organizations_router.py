@@ -5,7 +5,7 @@ from fastapi_cache.decorator import cache
 
 from src.api.depends import OrganizationServiceDepends
 from src.api.schemes.get_organization import (GeoPoint, GetOrganization,
-                                              OrganizationFilters)
+                                              OrganizationFilters, GetDetailedOrganization)
 
 router = APIRouter(prefix="/organizations")
 
@@ -99,11 +99,11 @@ async def search_by_activity(
     "/{id}",
     summary="Get organization by ID",
     description="Retrieve a single organization by its UUID.",
-    response_model=GetOrganization,
+    response_model=GetDetailedOrganization,
 )
 async def get_organization(
     id: UUID,
     org_service: OrganizationServiceDepends,
-) -> GetOrganization:
+) -> GetDetailedOrganization:
     org = await org_service.get(id)
-    return GetOrganization.model_validate(org)
+    return GetDetailedOrganization.model_validate(org)

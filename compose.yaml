@@ -1,7 +1,6 @@
 services:
   db:
     image: postgis/postgis:18-3.6
-    container_name: postgres_postgis
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -19,8 +18,8 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:8.13
-    container_name: pgadmin
     restart: unless-stopped
+
     depends_on:
       db:
         condition: service_healthy
@@ -34,7 +33,6 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis
     restart: unless-stopped
     expose:
       - ${REDIS_PORT}
@@ -44,7 +42,6 @@ services:
 
   web:
     build: .
-    container_name: fastapi_app
     restart: unless-stopped
     depends_on:
       db:

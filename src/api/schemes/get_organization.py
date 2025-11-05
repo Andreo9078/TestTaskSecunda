@@ -3,6 +3,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+class _GeoPoint(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    latitude: float
+    longitude: float
 
 class _Phone(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -13,6 +17,11 @@ class _Activity(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
     name: str
+
+class _Building(BaseModel):
+    name: str
+    location: _GeoPoint
+    id: UUID
 
 
 class OrganizationFilters(BaseModel):
@@ -31,6 +40,11 @@ class GetOrganization(BaseModel):
 
     phones: list[_Phone] = []
     activities: list[_Activity]
+
+class GetDetailedOrganization(GetOrganization):
+    building: _Building
+
+
 
 
 class GeoPoint(BaseModel):
